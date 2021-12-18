@@ -33,7 +33,8 @@ class DispatchPodcastDownloadEvents implements ShouldQueue
     {
         // here we should realistically check to see whether the database has been migrated, if not then this job
         // will automatically fail (specifically for the tech test; however this would be a general concern; if this job
-        // has a possibility of running in an environment that has not yet been fully setup, needs a failsafe).
+        // has a possibility of running in an environment that has not yet been fully setup, then needs a failsafe
+        // consideration).
         PodcastEpisode::chunk(10, function ($podcastEpisodes) {
             foreach ($podcastEpisodes as $podcastEpisode) {
                 for ($i = 0; $i < rand(1, 3); $i++) {

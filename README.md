@@ -12,6 +12,8 @@ docker-compose exec php php artisan migrate:fresh --seed && \
 docker-compose exec -d php crond -f
 ```
 
+explaining docker-compose exec -d php crond -f: when running the above command in general, it's going to start up and utilise the cron service in order for random downloads to be executed (every minute).
+
 ### Variables for .env
 We are going to be in need of a .env (this file should never make it to version control). and thus we're going to need to make a copy of the .env.example so that we can utilise this as the local environment for development. Upon cloning example environment we can then generate a key.
 ```
@@ -46,3 +48,6 @@ docker-compose exec php php artisan test
     - service nginx: **podcast-nginx**
 - be more specific with name spaces; however chosen to utilise the same name for event and listener so that it'd be more specific to what the developer will have to map to what. as a personal choice this was for more explicit event listener mappings than anything; but created some unnecessary aliasing for classes.
 - setup a database for unit/feature testing that's allowing of being cleaned and seeded which mimics the actual setup, having two differential databases for testing can warrant false positives|negatives and doesn't reflect the system as it stands.
+
+### Things I wanted to do: 
+I wanted to take use of websockets, setting up a frontend that consumes the events that are being made within the application. having the frontend auto update when new downloads happen rather than having to refesh the page to see changes.
