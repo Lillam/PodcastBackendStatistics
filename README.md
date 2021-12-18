@@ -42,9 +42,8 @@ docker-compose exec php php artisan test
 ```
 
 visiting the following for different variations of jsonified data: 
-- http://localhost:8088/api/recent-downloads/v1 (aggregated results by day)
-- http://localhost:8088/api/recent-downloads/v2 (aggregated results by podcast episode then by day)
-- http://localhost:8088/api/recent-downloads/v3 (aggregated results by podcast then by day)
+- http://localhost:8088/api/recent-downloads/v1 (aggregated results by podcast episode then by day)
+- http://localhost:8088/api/recent-downloads/v2 (aggregated results by podcast and then by day)
 
 ### Decisions: 
 - port 4306 on the database, because 3306 is already in use on my local machine. 
