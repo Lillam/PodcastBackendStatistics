@@ -19,6 +19,3 @@ Route::get('/recent-downloads/v1', [PodcastController::class, 'recentDownloadsv1
 
 Route::get('/recent-downloads/v2', [PodcastController::class, 'recentDownloadsv2'])
     ->name('podcasts.recent-downloads.2');
-
-Route::get('/recent-downloads/v3', [PodcastController::class, 'recentDownloadsv3'])
-    ->name('podcasts.recent-downloads.3');

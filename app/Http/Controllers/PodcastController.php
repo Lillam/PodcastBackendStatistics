@@ -6,11 +6,11 @@ use App\Models\Podcast;
 use Illuminate\Http\Request;
 use App\Events\PodcastDownloaded;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Models\PodcastEpisodeDownload;
 use Illuminate\Contracts\View\Factory;
+use App\Repositories\PodcastRepository;
+use App\Repositories\PodcastEpisodeRepository;
 use Illuminate\Contracts\Foundation\Application;
 
 class PodcastController extends Controller
@@ -59,27 +59,8 @@ class PodcastController extends Controller
      */
     public function recentDownloadsv1(): JsonResponse
     {
-        // dirty cheap way to do it, but the simplistic method for saving time.
-        DB::statement("SET SESSION sql_mode = ''");
-
-        // These types of query throw an error, count(*) would be a simpler method of handling this however, you'd
-        // need to turn off full group by. which can be achieved in a multitude of ways, the better way being a
-        // globalised edit to the ini file of mysql. other-wise you can utilise a query executor to set the session
-        // of the full group by to none.
         return response()->json([
-            'data' => PodcastEpisodeDownload::query()
-                ->selectRaw('count(event_uuid) as downloads, occurred_at')
-                ->last7Days()
-                ->groupBy('occurred_at')
-                ->get()
-                ->map(function ($eventGroup) {
-                    // the occurrence being X and the downloads being Y. flipping these will give you a different style
-                    // of a time series format.
-                    // this could be made a little more obvious for the consumption of a frontend API for instance:
-                    // apexcharts would require this to be:
-                    // return ['x' => $eventGroup->occurred_at->format('Y-m-d'), 'y' => $eventGroup->downloads];
-                    return [$eventGroup->occurred_at->format('Y-m-d') => $eventGroup->downloads];
-                }),
+            'data' => PodcastEpisodeRepository::recentDownloads()
         ]);
     }
 
@@ -91,67 +72,8 @@ class PodcastController extends Controller
      */
     public function recentDownloadsv2(): JsonResponse
     {
-        // dirty cheap way to do it, but the simplistic method for saving time.
-        DB::statement("SET SESSION sql_mode = ''");
-
         return response()->json([
-            'data' => PodcastEpisodeDownload::query()
-                ->selectRaw(
-                    'count(podcast_episode_downloads.event_uuid) as downloads,' .
-                    'podcast_episode_downloads.occurred_at,'.
-                    'podcast_episode_downloads.event_uuid,' .
-                    'podcast_episodes.name'
-                )
-                ->leftJoin(
-                    'podcast_episodes',
-                    'podcast_episodes.uuid',
-                    '=',
-                    'podcast_episode_downloads.podcast_episode_uuid'
-                )
-                ->last7Days()
-                ->groupBy([
-                    'podcast_episode_downloads.podcast_episode_uuid',
-                    'podcast_episode_downloads.occurred_at'
-                ])
-                ->get()
-                ->map(function ($eventGroup) {
-                    return [
-                        $eventGroup->name => [
-                            [$eventGroup->occurred_at->format('Y-m-d') => $eventGroup->downloads]
-                        ]
-                    ];
-                })
-        ]);
-    }
-
-    /**
-     * basically the same as above, however aggregated to podcasts and then by day. and returning results of each.
-     *
-     * @return JsonResponse
-     */
-    public function recentDownloadsv3(): JsonResponse
-    {
-        // dirty cheap way to do it, but the simplistic method for saving time.
-        DB::statement("SET SESSION sql_mode = ''");
-
-        return response()->json([
-            'data' => PodcastEpisodeDownload::query()
-                ->selectRaw('count(event_uuid) as downloads, occurred_at, podcast_uuid')
-                ->last7Days()
-                ->groupBy(['podcast_uuid', 'occurred_at'])
-                ->get()
-                ->map(function ($eventGroup) {
-                    // the occurrence being X and the downloads being Y. flipping these will give you a different style
-                    // of a time series format.
-                    // this could be made a little more obvious for the consumption of a frontend API for instance:
-                    // apexcharts would require this to be:
-                    // return ['x' => $eventGroup->occurred_at->format('Y-m-d'), 'y' => $eventGroup->downloads];
-                    return [
-                        $eventGroup->podcast_uuid => [
-                            $eventGroup->occurred_at->format('Y-m-d') => $eventGroup->downloads
-                        ]
-                    ];
-                })
+            'data' => PodcastRepository::recentDownloads()
         ]);
     }
 
